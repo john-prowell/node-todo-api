@@ -31,13 +31,13 @@ const {User} = require('./../server/models/user');
 //   console.log(e);
 // });
 
-const id = '5a9c8d0caadf1606441ba8b4';
+const id = '5a9c8d0caadf1606441ba8b411';
 
 User.findById(id).then((user) => {
   if (!user) {
     return console.log('No user found');
   }
   console.log('User', user);
-}).catch((e) => {
+}, (e) => {
   console.log(e);
 });
