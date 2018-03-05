@@ -1,3 +1,4 @@
+const {ObjectID} = require('mongodb');
 const express = require('express');
 const bodyParser = require('body-parser');
 
@@ -34,6 +35,9 @@ app.get('/todos', (req, res) => {
 app.get('/todos/:id', (req, res) => {
     var id = req.params.id;
     // Validate ID using isValid
+    if (!ObjectID.isValid(id)) {
+        return console.log('Todo ID is not valid');
+    }
 });
 
 app.listen(3000, () => {
