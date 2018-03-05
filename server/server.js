@@ -31,6 +31,11 @@ app.get('/todos', (req, res) => {
     });
 });
 
+app.get('/todos/:id', (req, res) => {
+    var id = req.params.id;
+    // Validate ID using isValid
+});
+
 app.listen(3000, () => {
     console.log('Started server on port 3000.');
 });
