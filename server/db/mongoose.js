@@ -1,11 +1,14 @@
 const mongoose = require('mongoose');
 
-mongoose.Promise = global.Promise; // tells mongoose to use built in Promise libary
-// check heroku mlab mongodb addon or use local machine
-// mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/TodoApp');
+require('dotenv').config();
 
-// Use mlab account directly or use local machine
-mongoose.connect('mongodb://todoapp:todoapp@ds157818.mlab.com:57818/todoapp' || 'mongodb://localhost:27017/TodoApp')
+mongoose.Promise = global.Promise; // tells mongoose to use built in Promise libary
+
+// Use LOCAL or REMOTE database - create .env file and set properties
+mongoose.connect(process.env.LOCAL_DATABASE).then(
+  () => { console.log('Connected to MongoDB') },
+  err => { console.error(`${err.message}`); }
+);
 
 module.exports = {
   mongoose: mongoose
