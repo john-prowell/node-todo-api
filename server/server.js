@@ -1,3 +1,5 @@
+require('./config/config');
+
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -72,7 +74,7 @@ app.patch('/todos/:id', (req, res) => {
         return res.status(404).send();
     }
 
-    if (_.isBoolean(body.completed) && body.completed) {
+    if (_.isBoolean(body.completed) && body.completed) { // if completed is true
         body.completedAt = new Date().getTime(); // returns javascript time stamp
     } else {
         body.completed = false;
@@ -87,9 +89,42 @@ app.patch('/todos/:id', (req, res) => {
     }).catch((e) => {
         res.status(400).send();
     })
-
 });
 
+// POST /users use _.pick to pick off the email and password
+app.post('/users', (req, res) => {
+    var body = _.pick(req.body, ['email', 'password']);
+    var user = new User({ // could just use body instead of creating object since email and pasword are picked off
+        email: body.email,
+        password: body.password
+    });
+
+    user.save().then(() => {
+        return user.generateAuthToken();
+      }).then((token) => {
+        res.header('x-auth', token).send(user);
+      }).catch((e) => {
+        res.status(400).send(e);
+      })    
+});
+
+app.get('/users', (req, res) => {
+    User.find().then((users) => {
+        res.send({users});
+    }).catch((e) => {
+        console.log(e);
+    })
+})
+
+app.delete('/users/:id', (req, res) => {
+    var id = req.params.id;
+    User.findByIdAndRemove(id).then((user) => {
+        if (!user) {
+            return res.status.send();
+        }
+        res.send(user);
+    })
+});
 
 app.listen(port, () => {
     console.log(`Started server on port ${port}.`);
