@@ -32,10 +32,12 @@ var UserSchema = new mongoose.Schema({
   }]
 });
 
+// Determines exactly what is sent back when a mongoose model is converted
+// into a JSON value
 UserSchema.methods.toJSON = function () {
   var user = this;
   var userObject = user.toObject(); // taking mongoose variable user and converting it
-  // to a regular object where ony the properties available on the document exist.
+  // to a regular object where only the properties available on the document exist.
   return _.pick(userObject, ['_id', 'email']);
 };
 
@@ -50,6 +52,26 @@ UserSchema.methods.generateAuthToken = function () {
   return user.save().then(() => {
     return token;
   });  
+};
+
+UserSchema.statics.findByToken = function (token) {
+  var User = this;
+  var decoded;
+
+    try {
+      decoded = jwt.verify(token, 'abc123');
+  } catch(e) {
+    // return new Promise((resolve, reject) => {
+    //   reject();
+    // });
+    return Promise.reject();
+  };
+
+  return User.findOne({
+    _id: decoded._id,
+    'tokens.token': token, // '' quotes are required when you have a . in the value
+    'tokens.access': 'auth'
+  });
 };
 
 var User = mongoose.model('User', UserSchema);

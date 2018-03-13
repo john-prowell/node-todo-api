@@ -8,6 +8,7 @@ const {ObjectID} = require('mongodb');
 const {mongoose} = require('./db/mongoose.js');
 const {Todo} = require('./models/todo');
 const {User} = require('./models/user');
+const {authenticate} = require('./middleware/authenicate');
 
 const app = express();
 const port = process.env.PORT;
@@ -108,23 +109,28 @@ app.post('/users', (req, res) => {
       })    
 });
 
-app.get('/users', (req, res) => {
-    User.find().then((users) => {
-        res.send({users});
-    }).catch((e) => {
-        console.log(e);
-    })
-})
 
-app.delete('/users/:id', (req, res) => {
-    var id = req.params.id;
-    User.findByIdAndRemove(id).then((user) => {
-        if (!user) {
-            return res.status.send();
-        }
-        res.send(user);
-    })
+app.get('/users/me', authenticate, (req, res) => {
+   res.send(req.user);
 });
+
+// app.get('/users', (req, res) => {
+//     User.find().then((users) => {
+//         res.send({users});
+//     }).catch((e) => {
+//         console.log(e);
+//     })
+// })
+
+// app.delete('/users/:id', (req, res) => {
+//     var id = req.params.id;
+//     User.findByIdAndRemove(id).then((user) => {
+//         if (!user) {
+//             return res.status.send();
+//         }
+//         res.send(user);
+//     })
+// });
 
 app.listen(port, () => {
     console.log(`Started server on port ${port}.`);
