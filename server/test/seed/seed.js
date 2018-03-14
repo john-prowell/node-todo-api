@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const {ObjectID} = require('mongodb');
 const {Todo} = require('./../../models/todo');
-const {User} = require('./../models/user');
+const {User} = require('./../../models/user');
 
 const userOneId = new ObjectID();
 const userTwoId = new ObjectID();
@@ -39,13 +39,19 @@ const todos = [{
     });
   };
 
-  const populateUser = (done) => {
+  const populateUsers = (done) => {
       User.remove({}).then(() => {
-          
-      })
+          var userOne = new User(users[0]).save(); 
+          var userTwo = new User(users[1]).save();
+          return Promise.all([userOne, userTwo])
+    }).then(() => {
+        done();
+    })
   }
 
   module.exports = {
       todos,
-      populateTodos
+      populateTodos,
+      users,
+      populateUsers
   }
