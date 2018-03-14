@@ -41,12 +41,22 @@ const todos = [{
 
   const populateUsers = (done) => {
       User.remove({}).then(() => {
+<<<<<<< HEAD
           var userOne = new User(users[0]).save(); 
           var userTwo = new User(users[1]).save();
           return Promise.all([userOne, userTwo])
     }).then(() => {
         done();
     })
+=======
+          var userOne = new User(users[0]).save();
+          var userTwo = new User(users[1]).save();
+
+        return Promise.all(userOne, userTwo);
+      }).then(() => {
+          done();
+      })
+>>>>>>> 57272688a6b19c124fecc93288dbbdcebbdb2e09
   }
 
   module.exports = {
