@@ -112,7 +112,6 @@ app.patch('/todos/:id', (req, res) => {
     })
 });
 
-// POST /users use _.pick to pick off the email and password
 app.post('/users', (req, res) => {
     var body = _.pick(req.body, ['email', 'password']);
     var user = new User({ // could just use body instead of creating object since email and pasword are picked off
@@ -120,10 +119,10 @@ app.post('/users', (req, res) => {
         password: body.password
     });
 
-    user.save().then(() => {
-        return user.generateAuthToken();
+    user.save().then(() => { // saves user
+        return user.generateAuthToken(); // creates token and pushes it into user document then saves user and returns the token
     }).then((token) => {
-        res.header('x-auth', token).send(user);
+        res.header('x-auth', token).send(user); // sets x-auth key in header with the token
     }).catch((e) => {
         res.status(400).send(e);
     })
