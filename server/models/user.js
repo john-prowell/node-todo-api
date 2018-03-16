@@ -42,12 +42,28 @@ UserSchema.methods.toJSON = function () {
   return _.pick(userObject, ['_id', 'email']);
 };
 
+// automatically hash the password before its saved to the database
+UserSchema.pre('save', function (next) {
+  var user = this;
+  if (user.isModified('password')) { // only hash the password if it has been modified (or is new)    
+    bcrypt.genSalt(10, (err, salt) => { // generate salt
+      bcrypt.hash(user.password, salt, (err, hash) => {  // hash with salt
+       user.password = hash; // sets user.password to the hash
+       next();
+      });
+    });
+  } else { // if password is already hashed then skip
+    next();
+  }
+});
+
+// Generate Token
 UserSchema.methods.generateAuthToken = function () {
   var user = this;
   var access = 'auth';
   var token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
   
-  user.tokens.push({access, token}); 
+  user.tokens.push({access, token}); // store token in user model in db
   // user.tokens.concat([{access, token}]); // suggested but doesn't work for me
 
   return user.save().then(() => {
@@ -55,6 +71,18 @@ UserSchema.methods.generateAuthToken = function () {
   });  
 };
 
+// Remove token
+UserSchema.methods.removeToken = function (token) {
+  var user = this;
+
+  return user.update({
+    $pull: {
+      tokens: {token}
+    }
+  });
+};
+ 
+// Find by token
 UserSchema.statics.findByToken = function (token) {
   var User = this;
   var decoded;
@@ -75,6 +103,8 @@ UserSchema.statics.findByToken = function (token) {
   });
 };
 
+
+// Check email and password match
 UserSchema.statics.findByCredentials = function (email, password) {
   var user = this;
 
@@ -96,21 +126,6 @@ UserSchema.statics.findByCredentials = function (email, password) {
     });
   });
 };
-
-UserSchema.pre('save', function (next) {
-  var user = this;
-  if (user.isModified('password')) {
-    // get user password from user.password
-    bcrypt.genSalt(10, (err, salt) => {
-      bcrypt.hash(user.password, salt, (err, hash) => {
-       user.password = hash;
-       next();
-      });
-    });
-  } else {
-    next();
-  }
-});
 
 var User = mongoose.model('User', UserSchema);
 

@@ -4,21 +4,11 @@ const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const {
-    ObjectID
-} = require('mongodb');
-const {
-    mongoose
-} = require('./db/mongoose.js');
-const {
-    Todo
-} = require('./models/todo');
-const {
-    User
-} = require('./models/user');
-const {
-    authenticate
-} = require('./middleware/authenicate');
+const { ObjectID } = require('mongodb');
+const { mongoose } = require('./db/mongoose.js');
+const { Todo } = require('./models/todo');
+const { User } = require('./models/user');
+const { authenticate } = require('./middleware/authenicate');
 
 const app = express();
 const port = process.env.PORT;
@@ -136,14 +126,22 @@ app.get('/users/me', authenticate, (req, res) => {
 app.post('/users/login', (req, res) => {
     var body = _.pick(req.body, ['email', 'password']);
 
-    User.findByCredentials(body.email, body.password).then((user) => {
-        return user.generateAuthToken().then((token) => {
-            res.header('x-auth', token).send(user);
+    User.findByCredentials(body.email, body.password).then((user) => { // Check if user and email and password match
+        return user.generateAuthToken().then((token) => { // if user then user comes back and token is generated 
+            res.header('x-auth', token).send(user); // and passed back in header along with the user
         });
     }).catch((e) => {
         res.status(400).send();
     });
 });
+
+app.delete('/users/me/token', authenticate, (req, res) => {
+    req.user.removeToken(req.token).then(() => {
+      res.status(200).send();
+    }, () => {
+      res.status(400).send();
+    });
+  });
 
 app.listen(port, () => {
     console.log(`Started server on port ${port}.`);
